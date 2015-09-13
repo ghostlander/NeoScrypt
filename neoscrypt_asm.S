@@ -26,6 +26,10 @@
 
 #if (ASM) && (__x86_64__)
 
+/* MOVQ_FIX addresses incorrect behaviour of old GNU assembler when transferring
+ * data between a 64-bit general purpose register and an MMX/SSE register:
+ * suffix or operands invalid for `movq' */
+
 /* blake2s_compress(mem)
  * AMD64 BLAKE2s block compression;
  * the MMX registers are used as a temporal general purpose storage */
@@ -44,7 +48,14 @@ _blake2s_compress:
 	pushq	%rsi
 	movq	%rcx, %rdi
 #endif
+
+#if !(MOVQ_FIX)
 	movq	%rsp, %mm0
+#else
+	movd	%esp, %mm0
+	shrq	$32, %rsp
+	movd	%esp, %mm7
+#endif
 
 /* initialise */
 	movl	0(%rdi), %eax
@@ -1301,7 +1312,15 @@ _blake2s_compress:
 	xorl	%r12d, 16(%rdi)		/* finalise */
 	xorl	%r14d, 24(%rdi)		/* finalise */
 
+#if !(MOVQ_FIX)
 	movq	%mm0, %rsp
+#else
+	movd	%mm0, %esp
+	movd	%mm7, %eax
+	shlq	$32, %rax
+	orq	%rax, %rsp
+#endif
+
 #if (WIN64)
 	popq	%rsi
 	popq	%rdi
@@ -1710,7 +1729,12 @@ _neoscrypt_fastkdf_opt:
 	psadbw	%xmm5, %xmm0
 	movhlps	%xmm0, %xmm1
 	paddq	%xmm1, %xmm0
+#if !(MOVQ_FIX)
 	movq	%xmm0, %r13
+#else
+	movq	%xmm0, 0(%r14)
+	movq	0(%r14), %r13
+#endif
 	andq	$0xFF, %r13
 	leaq	320(%r12, %r13), %rbx
 	movdqu	0(%rbx), %xmm0
@@ -3985,14 +4009,26 @@ _blake2s_compress_4way:
 	movq	%r8, 136(%rsi)
 /*	movq	%r9, 144(%rsi) */
 /*	movq	%r9, 152(%rsi) */
+#if !(MOVQ_FIX)
 	movq	%r9, %xmm9
 	movlhps	%xmm9, %xmm9
+#else
+	movq	%r9, 0(%rsi)
+	movq	%r9, 8(%rsi)
+	movdqa	0(%rsi), %xmm9
+#endif
 	movq	%r10, 160(%rsi)
 	movq	%r10, 168(%rsi)
 /*	movq	%r11, 176(%rsi) */
 /*	movq	%r11, 184(%rsi) */
+#if !(MOVQ_FIX)
 	movq	%r11, %xmm11
 	movlhps	%xmm11, %xmm11
+#else
+	movq	%r11, 0(%rsi)
+	movq	%r11, 8(%rsi)
+	movdqa	0(%rsi), %xmm11
+#endif
 	movq	$0x510E527F510E527F, %r12
 	movq	$0x9B05688C9B05688C, %r13
 	movq	$0x1F83D9AB1F83D9AB, %r14
@@ -4026,18 +4062,30 @@ _blake2s_compress_4way:
 /*	movq	%rax, 192(%rsi) */
 /*	movq	%rbx, 200(%rsi) */
 /*	movdqa	192(%rsi), %xmm3 */	/* A */
+#if !(MOVQ_FIX)
 	movq	%rax, %xmm3
 	movq	%rbx, %xmm15
 	movlhps	%xmm15, %xmm3
+#else
+	movq	%rax, 0(%rsi)
+	movq	%rbx, 8(%rsi)
+	movdqa	0(%rsi), %xmm3
+#endif
 	movq	%rcx, 208(%rsi)
 	pxor	%xmm0, %xmm3		/* A */
 	movq	%rdx, 216(%rsi)
 /*	movq	%r8, 224(%rsi) */
 /*	movq	%r9, 232(%rsi) */
 /*	movdqa	224(%rsi), %xmm7 */	/* C */
+#if !(MOVQ_FIX)
 	movq	%r8, %xmm7
 	movq	%r9, %xmm15
 	movlhps	%xmm15, %xmm7
+#else
+	movq	%r8, 0(%rsi)
+	movq	%r9, 8(%rsi)
+	movdqa	0(%rsi), %xmm7
+#endif
 	movq	%r10, 240(%rsi)
 	pxor	%xmm4, %xmm7		/* C */
 	movq	%r11, 248(%rsi)
