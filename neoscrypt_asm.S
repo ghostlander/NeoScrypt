@@ -1331,6 +1331,7 @@ _blake2s_compress:
 	popq	%r12
 	popq	%rbp
 	popq	%rbx
+	emms
 	ret
 
 

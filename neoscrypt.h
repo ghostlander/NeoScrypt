@@ -30,13 +30,9 @@ unsigned int cpu_vec_exts(void);
 }
 #else
 
-#if (WINDOWS) && (__APPLE__)
-/* sizeof(unsigned long) = 4 for MinGW64 and Mac GCC */
-typedef unsigned long long ulong;
-#else
-typedef unsigned long ulong;
-#endif
-typedef unsigned int  uint;
+typedef unsigned long long ullong;
+typedef signed long long llong;
+typedef unsigned int uint;
 typedef unsigned char uchar;
 
 #ifndef MIN
@@ -47,11 +43,10 @@ typedef unsigned char uchar;
 #define MAX(a, b) ((a) > (b) ? a : b)
 #endif
 
-#define SCRYPT_BLOCK_SIZE 64
-#define SCRYPT_HASH_BLOCK_SIZE 64
-#define SCRYPT_HASH_DIGEST_SIZE 32
+#define BLOCK_SIZE 64
+#define DIGEST_SIZE 32
 
-typedef uchar hash_digest[SCRYPT_HASH_DIGEST_SIZE];
+typedef uchar hash_digest[DIGEST_SIZE];
 
 #define ROTL32(a,b) (((a) << (b)) | ((a) >> (32 - b)))
 #define ROTR32(a,b) (((a) >> (b)) | ((a) << (32 - b)))

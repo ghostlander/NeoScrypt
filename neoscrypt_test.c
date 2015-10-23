@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     int opt, arg;
     uint id = 0, it = 0;
     struct timeval time;
-    ulong delta, start, ustart, finish, ufinish;
+    ullong delta, start, ustart, finish, ufinish;
     uint *pinput = (uint *) &input[0];
 #if (ASM) && (MINER_4WAY)
     uint *pprf_input = (uint *) &prf_input_4way[0];
