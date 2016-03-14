@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-void neoscrypt(const unsigned char *input, unsigned char *output,
+void neoscrypt(const unsigned char *password, unsigned char *output,
   unsigned int profile);
 
 void neoscrypt_blake2s(const void *input, const unsigned int input_size,
@@ -13,15 +13,21 @@ void neoscrypt_copy(void *dstp, const void *srcp, unsigned int len);
 void neoscrypt_erase(void *dstp, unsigned int len);
 void neoscrypt_xor(void *dstp, const void *srcp, unsigned int len);
 
-#if (ASM) && (MINER_4WAY)
-void neoscrypt_4way(const unsigned char *input, unsigned char *output,
-  unsigned int profile);
+#if defined(ASM) && defined(MINER_4WAY)
+void neoscrypt_4way(const unsigned char *password, unsigned char *output,
+  unsigned char *scratchpad);
+
+#ifdef SHA256
+void scrypt_4way(const unsigned char *password, unsigned char *output,
+  unsigned char *scratchpad);
+#endif
 
 void neoscrypt_blake2s_4way(const unsigned char *input,
   const unsigned char *key, unsigned char *output);
 
 void neoscrypt_fastkdf_4way(const unsigned char *password,
-  const unsigned char *salt, unsigned char *output, unsigned int mode);
+  const unsigned char *salt, unsigned char *output, unsigned char *scratchpad,
+  const unsigned int mode);
 #endif
 
 unsigned int cpu_vec_exts(void);

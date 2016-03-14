@@ -1,9 +1,9 @@
 #!/bin/sh
 
-DEFINES="-DOPT -DASM -DMINER_4WAY -DSHA256"
+DEFINES="-DASM -DOPT -DMINER_4WAY -DSHA256"
 
 CC="gcc"
-CFLAGS="-Wall -O2 -fomit-frame-pointer"
+CFLAGS="-Wall -O2 -fomit-frame-pointer -fno-stack-protector"
 
 LD="gcc"
 LDFLAGS="-Wl,-s"
