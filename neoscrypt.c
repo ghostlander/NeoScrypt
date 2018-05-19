@@ -2,7 +2,7 @@
  * Copyright (c) 2009 Colin Percival, 2011 ArtForz
  * Copyright (c) 2012 Andrew Moon (floodyberry)
  * Copyright (c) 2012 Samuel Neves <sneves@dei.uc.pt>
- * Copyright (c) 2014-2016 John Doering <ghostlander@phoenixcoin.org>
+ * Copyright (c) 2014-2018 John Doering <ghostlander@phoenixcoin.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -738,23 +738,14 @@ void neoscrypt_erase(void *dstp, uint len) {
     }
 }
 
-/* 32-bit / 64-bit optimised XOR engine */
+/* Fail safe bytewise XOR engine */
 void neoscrypt_xor(void *dstp, const void *srcp, uint len) {
-    size_t *dst = (size_t *) dstp;
-    size_t *src = (size_t *) srcp;
-    uint i, tail;
+    uchar *dst = (uchar *) dstp;
+    uchar *src = (uchar *) srcp;
+    uint i;
 
-    for(i = 0; i < (len / sizeof(size_t)); i++)
+    for(i = 0; i < len; i++)
       dst[i] ^= src[i];
-
-    tail = len & (sizeof(size_t) - 1);
-    if(tail) {
-        uchar *dstb = (uchar *) dstp;
-        uchar *srcb = (uchar *) srcp;
-
-        for(i = len - tail; i < len; i++)
-          dstb[i] ^= srcb[i];
-    }
 }
 
 #endif /* ASM */
