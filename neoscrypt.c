@@ -35,7 +35,7 @@
 #include "neoscrypt.h"
 
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
 
 /* SHA-256 */
 
@@ -274,10 +274,10 @@ void neoscrypt_pbkdf2_sha256(const uchar *password, uint password_len,
     }
 }
 
-#endif /* SHA256 */
+#endif /* NEOSCRYPT_SHA256 */
 
 
-#ifdef BLAKE256
+#ifdef NEOSCRYPT_BLAKE256
 
 /* BLAKE-256 */
 
@@ -566,12 +566,12 @@ static void neoscrypt_pbkdf2_blake256(const uchar *password,
     }
 }
 
-#endif /* BLAKE256 */
+#endif /* NEOSCRYPT_BLAKE256 */
 
 
 /* NeoScrypt */
 
-#ifdef ASM
+#ifdef NEOSCRYPT_ASM
 
 extern void neoscrypt_copy(void *dstp, const void *srcp, uint len);
 extern void neoscrypt_erase(void *dstp, uint len);
@@ -748,7 +748,7 @@ void neoscrypt_xor(void *dstp, const void *srcp, uint len) {
       dst[i] ^= src[i];
 }
 
-#endif /* ASM */
+#endif /* NEOSCRYPT_ASM */
 
 
 /* BLAKE2s */
@@ -783,7 +783,7 @@ static const uint blake2s_IV[8] = {
     0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
 };
 
-#ifdef ASM
+#ifdef NEOSCRYPT_ASM
 
 extern void blake2s_compress(blake2s_state *S);
 
@@ -2192,7 +2192,7 @@ static void blake2s_compress(blake2s_state *S) {
     S->h[7] ^= v[7] ^ v[15];
 }
 
-#endif /* ASM */
+#endif /* NEOSCRYPT_ASM */
 
 static void blake2s_update(blake2s_state *S, const uchar *input,
   uint input_size) {
@@ -2264,7 +2264,7 @@ void neoscrypt_blake2s(const void *input, const uint input_size,
     neoscrypt_copy(output, S, output_size);
 }
 
-#ifndef OPT
+#ifndef NEOSCRYPT_OPT
 
 #define FASTKDF_BUFFER_SIZE 256U
 
@@ -2362,7 +2362,7 @@ void neoscrypt_fastkdf(const uchar *password, uint password_len,
 
 #else
 
-#ifdef ASM
+#ifdef NEOSCRYPT_ASM
 
 extern void neoscrypt_fastkdf_opt(const uchar *password, const uchar *salt,
   uchar *output, uint mode);
@@ -2459,12 +2459,12 @@ void neoscrypt_fastkdf_opt(const uchar *password, const uchar *salt,
     }
 }
 
-#endif /* ASM */
+#endif /* NEOSCRYPT_ASM */
 
-#endif /* !(OPT) */
+#endif /* !(NEOSCRYPT_OPT) */
 
 
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
 
 /* Configurable optimised block mixer */
 static void neoscrypt_blkmix(uint *X, uint *Y, uint r, uint mixmode) {
@@ -2604,7 +2604,7 @@ void neoscrypt(const uchar *password, uchar *output, uint profile) {
 
         default:
         case(0x0):
-#ifdef OPT
+#ifdef NEOSCRYPT_OPT
             neoscrypt_fastkdf_opt(password, password, (uchar *) X, 0);
 #else
             neoscrypt_fastkdf(password, 80, password, 80, 32,
@@ -2612,14 +2612,14 @@ void neoscrypt(const uchar *password, uchar *output, uint profile) {
 #endif
             break;
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
         case(0x1):
             neoscrypt_pbkdf2_sha256(password, 80, password, 80, 1,
               (uchar *) X, r * 2 * BLOCK_SIZE);
             break;
 #endif
 
-#ifdef BLAKE256
+#ifdef NEOSCRYPT_BLAKE256
         case(0x2):
             neoscrypt_pbkdf2_blake256(password, 80, password, 80, 1,
               (uchar *) X, r * 2 * BLOCK_SIZE);
@@ -2677,7 +2677,7 @@ void neoscrypt(const uchar *password, uchar *output, uint profile) {
 
         default:
         case(0x0):
-#ifdef OPT
+#ifdef NEOSCRYPT_OPT
             neoscrypt_fastkdf_opt(password, (uchar *) X, output, 1);
 #else
             neoscrypt_fastkdf(password, 80, (uchar *) X,
@@ -2685,14 +2685,14 @@ void neoscrypt(const uchar *password, uchar *output, uint profile) {
 #endif
             break;
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
         case(0x1):
             neoscrypt_pbkdf2_sha256(password, 80, (uchar *) X,
               r * 2 * BLOCK_SIZE, 1, output, 32);
             break;
 #endif
 
-#ifdef BLAKE256
+#ifdef NEOSCRYPT_BLAKE256
         case(0x2):
             neoscrypt_pbkdf2_blake256(password, 80, (uchar *) X,
               r * 2 * BLOCK_SIZE, 1, output, 32);
@@ -2703,10 +2703,10 @@ void neoscrypt(const uchar *password, uchar *output, uint profile) {
 
 }
 
-#endif /* !(ASM) */
+#endif /* !(NEOSCRYPT_ASM) */
 
 
-#if defined(ASM) && defined(MINER_4WAY)
+#if defined(NEOSCRYPT_ASM) && defined(NEOSCRYPT_MINER_4WAY)
 
 extern void neoscrypt_xor_salsa_4way(uint *X, uint *X0, uint *Y, uint double_rounds);
 extern void neoscrypt_xor_chacha_4way(uint *Z, uint *Z0, uint *Y, uint double_rounds);
@@ -2910,7 +2910,7 @@ void neoscrypt_4way(const uchar *password, uchar *output, uchar *scratchpad) {
       (uchar *) &scratchpad[0], 1);
 }
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
 /* 4-way Scrypt(1024, 1, 1) with Salsa20/8 */
 void scrypt_4way(const uchar *password, uchar *output, uchar *scratchpad) {
     const uint N = 1024, r = 1, double_rounds = 4;
@@ -2960,7 +2960,7 @@ void scrypt_4way(const uchar *password, uchar *output, uchar *scratchpad) {
         (uchar *) &Y[k * r * 32], r * 128, 1,
         (uchar *) &output[k * 32], 32);
 }
-#endif /* SHA256 */
+#endif /* NEOSCRYPT_SHA256 */
 
 
 extern void blake2s_compress_4way(void *T);
@@ -3242,9 +3242,9 @@ void neoscrypt_fastkdf_4way(const uchar *password, const uchar *salt,
 
 }
 
-#endif /* (ASM) && (MINER_4WAY) */
+#endif /* (NEOSCRYPT_ASM) && (NEOSCRYPT_MINER_4WAY) */
 
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
 uint cpu_vec_exts() {
 
     /* No assembly, no extensions */

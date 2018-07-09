@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DEFINES="-DASM -DOPT -DMINER_4WAY -DSHA256"
+DEFINES="-DNEOSCRYPT_ASM -DNEOSCRYPT_OPT -DNEOSCRYPT_MINER_4WAY -DNEOSCRYPT_SHA256"
 
 CC="gcc"
 CFLAGS="-Wall -O2 -fomit-frame-pointer -fno-stack-protector"

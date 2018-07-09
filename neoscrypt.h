@@ -13,11 +13,11 @@ void neoscrypt_copy(void *dstp, const void *srcp, unsigned int len);
 void neoscrypt_erase(void *dstp, unsigned int len);
 void neoscrypt_xor(void *dstp, const void *srcp, unsigned int len);
 
-#if defined(ASM) && defined(MINER_4WAY)
+#if defined(NEOSCRYPT_ASM) && defined(NEOSCRYPT_MINER_4WAY)
 void neoscrypt_4way(const unsigned char *password, unsigned char *output,
   unsigned char *scratchpad);
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
 void scrypt_4way(const unsigned char *password, unsigned char *output,
   unsigned char *scratchpad);
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016 John Doering <ghostlander@phoenixcoin.org>
+ * Copyright (c) 2014-2018 John Doering <ghostlander@phoenixcoin.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #include "neoscrypt.h"
 
 
-#ifdef OPT
+#ifdef NEOSCRYPT_OPT
 extern void neoscrypt_fastkdf_opt(const uchar *password, const uchar *salt,
   uchar *output, uint mode);
 #else
@@ -62,12 +62,12 @@ int main(int argc, char *argv[]) {
     uint kdf_input_len = 80, kdf_output_len = 256;
     uint neoscrypt_output_len = 32;
     uchar input[kdf_input_len], output[kdf_output_len];
-#if defined(ASM) && defined(MINER_4WAY)
+#if defined(NEOSCRYPT_ASM) && defined(NEOSCRYPT_MINER_4WAY)
     uchar prf_input_4way[256], prf_key_4way[128];
     uchar kdf_input_4way[320], kdf_key_4way[320], kdf_output_4way[1024];
     const size_t align = 0x40;
     uchar *scratchbuf;
-#ifndef SHA256
+#ifndef NEOSCRYPT_SHA256
     scratchbuf = (uchar *) malloc(134464 + align);
 #else
     scratchbuf = (uchar *) malloc(525632 + align);
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     struct timeval time;
     ullong delta, start, ustart, finish, ufinish;
     uint *pinput = (uint *) &input[0];
-#if defined(ASM) && defined(MINER_4WAY)
+#if defined(NEOSCRYPT_ASM) && defined(NEOSCRYPT_MINER_4WAY)
     uint *pprf_input = (uint *) &prf_input_4way[0];
     uint *pkdf_input = (uint *) &kdf_input_4way[0];
 #endif
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
             start  = time.tv_sec;
             ustart = time.tv_usec;
             for(i = 0; i < it; i++) {
-#ifdef OPT
+#ifdef NEOSCRYPT_OPT
                 neoscrypt_fastkdf_opt(input, input, output, 0);
 #else
                 neoscrypt_fastkdf(input, kdf_input_len, input, kdf_input_len, 32,
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
             finish  = time.tv_sec;
             ufinish = time.tv_usec;
             delta = (finish - start) * 1000000 + ufinish - ustart;
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
             printf("NeoScrypt: %.3f KH/s\n",
 #else
             printf("NeoScrypt INT: %.3f KH/s\n",
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
               (double)it * 1000 / (double)delta);
             return(0);
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
         case(4):
             if(!it) it = 5000;
             gettimeofday(&time, NULL);
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
             finish  = time.tv_sec;
             ufinish = time.tv_usec;
             delta = (finish - start) * 1000000 + ufinish - ustart;
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
             printf("Scrypt: %.3f KH/s\n",
 #else
             printf("Scrypt INT: %.3f KH/s\n",
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
             finish  = time.tv_sec;
             ufinish = time.tv_usec;
             delta = (finish - start) * 1000000 + ufinish - ustart;
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
             printf("NeoScrypt: %.3f KH/s\n",
 #else
             printf("NeoScrypt SSE2: %.3f KH/s\n",
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
               (double)it * 1000 / (double)delta);
             return(0);
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
         case(6):
             if(!it) it = 5000;
             gettimeofday(&time, NULL);
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
             finish  = time.tv_sec;
             ufinish = time.tv_usec;
             delta = (finish - start) * 1000000 + ufinish - ustart;
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
             printf("Scrypt: %.3f KH/s\n",
 #else
             printf("Scrypt SSE2: %.3f KH/s\n",
@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
             return(0);
 #endif
 
-#if defined(ASM) && defined(MINER_4WAY)
+#if defined(NEOSCRYPT_ASM) && defined(NEOSCRYPT_MINER_4WAY)
         case(7):
             if(!it) it = 1000000;
             gettimeofday(&time, NULL);
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
               (double)it * 1000 / (double)delta);
             return(0);
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
         case(10):
             if(!it) it = 5000;
             gettimeofday(&time, NULL);
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
     printf("BLAKE2s integrity test %s", status ? fail_str : pass_str);
 
 
-#ifdef OPT
+#ifdef NEOSCRYPT_OPT
     neoscrypt_fastkdf_opt(input, input, output, 0);
 #else
     neoscrypt_fastkdf(input, kdf_input_len, input, kdf_input_len, 32,
@@ -407,7 +407,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
     printf("NeoScrypt integrity test %s", status ? fail_str : pass_str);
 #else
     printf("NeoScrypt INT integrity test %s", status ? fail_str : pass_str);
@@ -425,7 +425,7 @@ int main(int argc, char *argv[]) {
     printf("NeoScrypt SSE2 integrity test %s", status ? fail_str : pass_str);
 #endif
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
 
     neoscrypt(input, output, 0x80000903);
 
@@ -443,7 +443,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-#ifndef ASM
+#ifndef NEOSCRYPT_ASM
     printf("Scrypt integrity test %s", status ? fail_str : pass_str);
 #else
     printf("Scrypt INT integrity test %s", status ? fail_str : pass_str);
@@ -461,9 +461,9 @@ int main(int argc, char *argv[]) {
     printf("Scrypt SSE2 integrity test %s", status ? fail_str : pass_str);
 #endif
 
-#endif /* SHA256 */
+#endif /* NEOSCRYPT_SHA256 */
 
-#if defined(ASM) && defined(MINER_4WAY)
+#if defined(NEOSCRYPT_ASM) && defined(NEOSCRYPT_MINER_4WAY)
 
     prf_input_4way[0] = 0x00;
     prf_key_4way[0] = 0x00;
@@ -792,7 +792,7 @@ int main(int argc, char *argv[]) {
     printf("NeoScrypt SSE2 4-way part D integrity test %s",
       status ? fail_str : pass_str);
 
-#ifdef SHA256
+#ifdef NEOSCRYPT_SHA256
 
     scrypt_4way(input, output, (uchar *) &scratchbuf[(size_t)scratchbuf & (align - 1)]);
 
@@ -858,11 +858,11 @@ int main(int argc, char *argv[]) {
     printf("Scrypt SSE2 4-way part D integrity test %s",
       status ? fail_str : pass_str);
 
-#endif /* SHA256 */
+#endif /* NEOSCRYPT_SHA256 */
 
     free(scratchbuf);
 
-#endif /* (ASM) && (MINER_4WAY) */
+#endif /* (NEOSCRYPT_ASM) && (NEOSCRYPT_MINER_4WAY) */
 
     return(ret_status);
 }
